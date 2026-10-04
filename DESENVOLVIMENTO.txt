@@ -1,0 +1,128 @@
+# Registro do Desenvolvimento e Uso de IA
+
+---
+
+## 1. Organização e execução do trabalho
+
+A ordem em que estruturei e executei o trabalho:
+
+1. Leitura do enunciado e levantamento dos requisitos funcionais e não-funcionais.
+2. Definição da arquitetura e criação da solution em monorepo com as camadas de Clean Architecture.
+3. Modelagem da entidade `Candidato` e configuração da persistência com Entity Framework Core e SQL Server.
+4. Implementação dos endpoints de cadastro (POST) e consulta (GET por ID e listagem).
+5. Desenvolvimento do serviço de extração de dados de currículo em PDF com PdfPig e Regex.
+6. Configuração de Rate Limiting global, CORS e documentação Swagger.
+7. Criação do front-end (React + Vite) com formulário de cadastro e importação de currículo em PDF.
+8. Regra de e-mail único (checagem no serviço e índice único no banco) e validações nas duas pontas.
+9. Testes unitários com xUnit (`Ciee.UnitTests`), incluindo cenários de erro e arquivos corrompidos.
+10. Testes manuais via Swagger/cURL e pelo front-end, ajustes finais e escrita da documentação.
+
+## 2. Principais decisões técnicas
+
+| Decisão | Motivo |
+|---|---|
+| Clean Architecture em 4 camadas | Separar regras de negócio de infraestrutura, facilitando testes e manutenção |
+| Interfaces de repositório no Domain | Manter o domínio sem acoplamento com Entity Framework ou SQL Server |
+| `IPdfService` na Application, `PdfPigService` na Infrastructure | Isolar a tecnologia de leitura de PDF, permitindo trocá-la no futuro (ex.: por OCR) sem alterar as regras |
+| PdfPig com `ContentOrderTextExtractor` | Biblioteca .NET sem dependências externas; o extrator preserva a ordem visual e as quebras de linha |
+| Extração por heurística + Regex | Funciona para currículos com texto selecionável e não depende de APIs pagas ou externas |
+| Rate Limiting global por IP (Fixed Window) | Proteger a API contra excesso de requisições, principalmente no endpoint de upload |
+| GUID como identificador (`Id`) | Evitar IDs sequenciais previsíveis e garantir unicidade |
+| Limite de 5 MB no upload de PDF | Evitar consumo excessivo de memória com arquivos muito grandes |
+| `IDesignTimeDbContextFactory` | Permitir criar e aplicar migrations sem inicializar a API |
+| E-mail único: checagem no serviço + índice único no banco | A checagem dá uma mensagem clara na maioria dos casos; o índice garante a regra mesmo com cadastros simultâneos |
+| `409 Conflict` para e-mail já cadastrado | Diferencia conflito de regra de negócio de dados inválidos (`400`) e de falha interna (`500`) |
+| `Email` como Value Object que normaliza (trim e minúsculas) e limita o tamanho | Mantém a regra no domínio, independente de quem chama, e evita duplicidade por diferença de maiúsculas |
+| Apenas nome e e-mail obrigatórios | Segue o enunciado: telefone, área de interesse e resumo são opcionais |
+| Validação na API (`DataAnnotations`) e no front-end | O front dá feedback imediato ao usuário; a API não depende do front para garantir a integridade dos dados |
+| Front-end em React + Vite | Setup rápido e adequado ao escopo de um formulário com upload |
+
+## 3. Ferramentas de IA utilizadas
+
+- **Claude (Anthropic)**, via claude.ai, usado como apoio em diagnóstico de erros, ajustes de código, construção do front-end e revisão da documentação (detalhes na seção 4).
+- Não utilizei outras ferramentas de IA nem assistentes de código integrados à IDE.
+- As decisões de arquitetura, a escolha das tecnologias e a revisão final do código foram minhas.
+
+## 4. Em que etapas a IA ajudou
+
+| Etapa | Pedido (resumo) | Como foi aproveitado |
+|---|---|---|
+| Extração de PDF | Enviei um currículo e o código inicial do `PdfPigService`; o nome vinha `null` | A IA identificou que `pagina.Text` concatena o texto sem quebras de linha. Troquei por `ContentOrderTextExtractor` |
+| Validação do nome | Tornar a detecção do nome mais robusta | Passei a varrer as primeiras linhas atrás de um padrão plausível de nome, em vez de usar só a primeira linha |
+| Formatação do nome | Evitar preposições ("Da", "De") em maiúsculo | Função utilitária que mantém as preposições em minúsculas |
+| Telefone | O DDD vinha truncado em alguns formatos | Regex ajustada para aceitar DDD com ou sem parênteses |
+| Resumo profissional | O texto capturava cabeçalho e contatos junto | A busca passou a extrair só a seção de resumo/objetivo, até o próximo título em caixa alta |
+| Rate Limiting | Erro de compilação com os tipos do limitador | Os tipos pertencem a `System.Threading.RateLimiting`; corrigi os namespaces |
+| Front-end | O formulário estava visualmente ruim e a validação nativa do navegador ("Preencha este campo") era feia | A IA propôs validação própria no React, erros por campo, máscara de telefone e um tema escuro consistente. Apliquei e ajustei os textos |
+| E-mail duplicado | Erro "LINQ expression could not be translated" ao checar o e-mail | A IA explicou que o `Email` estava mapeado com `HasConversion`, então o EF não enxergava `Email.Endereco`. Passei a comparar o Value Object inteiro |
+| Resposta da API | O front mostrava "erro interno" para e-mail já cadastrado | Mapeei `InvalidOperationException` para `409` no controller e tratei esse status no front |
+| Validações e integridade | Reforçar as regras de cadastro | Adotei `DataAnnotations` no DTO, índice único no banco e normalização do `Email` |
+| Testes e documentação | Estruturação dos testes com xUnit e revisão do README | Usei `ITestOutputHelper` nos testes e reescrevi o README para refletir o monorepo |
+
+## 5. O que precisei corrigir, adaptar ou descartar
+
+- **Corrigido**: `pagina.Text` foi substituído pelo extrator baseado em ordem visual, que preserva as quebras de linha.
+- **Corrigido**: o `Program.cs` referenciava `PartitionedRateLimiter` e tipos relacionados no namespace errado (`Microsoft.AspNetCore.RateLimiting`).
+- **Corrigido**: a checagem de e-mail usava `c.Email.Endereco` na query, que o EF não consegue traduzir quando o Value Object é mapeado por conversão. Passou a comparar o `Email` completo.
+- **Adaptado**: a extração do nome evoluiu da leitura da primeira linha para uma busca nas primeiras linhas, com validações (sem dígitos, e-mail ou link; 2 a 7 palavras).
+- **Adaptado**: o controller passou a diferenciar `400` (dados inválidos), `409` (e-mail já cadastrado) e `500` (erro interno), e a devolver detalhes técnicos do erro apenas em ambiente de desenvolvimento.
+- **Corrigido na proposta da IA**: a primeira versão do formulário marcava telefone e área de interesse como obrigatórios, mas o enunciado exige apenas nome e e-mail. Ajustei o front e o DTO.
+- **Corrigido na proposta da IA**: o limite do e-mail no DTO foi sugerido com 254 caracteres, enquanto a coluna do banco é `NVARCHAR(150)`. Alinhei tudo em 150 para evitar que um valor passasse na validação e falhasse no banco.
+- **Descartado**: a primeira sugestão da IA para validar o nome usava um campo `static readonly Regex`, que lançou `NullReferenceException` ao depurar no meu ambiente. Não cheguei a esclarecer a causa e troquei por `Regex.IsMatch`/`Regex.Match` estáticos, aplicando o mesmo padrão ao e-mail e ao telefone.
+- **Descartado**: o fallback do resumo que devolvia os primeiros 500 caracteres do documento, trazendo cabeçalho e contatos. Agora o campo retorna `null` se a seção não for encontrada, e o usuário preenche manualmente no front-end.
+- **Descartado**: a validação nativa do navegador nos campos do formulário, substituída por validação própria com mensagens por campo.
+
+## 6. Como verifiquei se a solução estava correta
+
+### 6.1 Estratégia de testes unitários (`Ciee.UnitTests`)
+
+Os testes unitários usam **xUnit** e focam nos componentes críticos do domínio e dos serviços, sem depender de banco de dados real nem de I/O externo:
+
+- **Value Object `Email`**: e-mails válidos são aceitos; e-mails vazios, mal formatados ou com mais de 150 caracteres lançam `ArgumentException`.
+- **Serviço de extração de PDF (`PdfPigService`)**: testes com PDFs de exemplo e arquivos corrompidos, garantindo que uma falha de leitura ou um arquivo inválido não derrube a aplicação e que o comportamento seguro (campos `null` para preenchimento manual) seja mantido.
+- **Regras de negócio no serviço de aplicação**: verificação da prevenção de duplicidade (`ExisteComEmailAsync`) e dos fluxos de cadastro manual e via PDF.
+
+Para executar:
+
+```bash
+dotnet test --logger "console;verbosity=detailed"
+```
+
+### 6.2 Verificações manuais
+
+- Testes de ponta a ponta pelo front-end e pelo Swagger/cURL, com currículos válidos, PDF corrompido e PDF acima de 5 MB.
+- Envio do formulário com campos obrigatórios vazios, para conferir as mensagens por campo.
+- Tentativa de cadastrar o mesmo e-mail duas vezes, para conferir a resposta `409` e o aviso no front.
+- Teste do Rate Limiting disparando requisições em lote para confirmar o retorno `429`.
+- Depurador do Visual Studio para inspecionar as linhas extraídas do PDF e achar a causa do nome `null`.
+
+O front-end não possui testes automatizados; a verificação dele foi manual.
+
+## 7. Tempo aproximado dedicado
+
+Cerca de 16 horas, distribuídas em 3 dias de desenvolvimento, testes e documentação.
+
+## 8. Dificuldades, limitações e melhorias futuras
+
+**Dificuldades**
+
+- Descobrir por que o texto extraído do PDF vinha em um bloco único (resolvido com o extrator por ordem de conteúdo).
+- Entender por que a consulta de e-mail duplicado não era traduzida pelo EF Core quando o e-mail é um Value Object mapeado por conversão.
+- Manter os limites de tamanho consistentes entre front-end, DTO, entidade e banco.
+- Ajustar versões de pacotes durante a configuração inicial do projeto e do Swagger.
+
+**Limitações**
+
+- PDFs escaneados (imagem) não têm texto extraível sem uma camada de OCR.
+- Currículos em duas colunas podem ter a ordem das linhas invertida pelas heurísticas atuais.
+- A área de interesse depende de uma lista fixa de palavras-chave.
+- Não há testes automatizados do front-end nem testes de integração da API.
+
+**Melhorias com mais tempo**
+
+- Integrar OCR (como Tesseract) para currículos digitalizados.
+- Usar coordenadas e tamanho da fonte para identificar nome e títulos (o nome costuma ser o maior texto da página).
+- Testes de integração dos endpoints e do banco com `WebApplicationFactory`.
+- Testes do front-end (por exemplo, Vitest e Testing Library) para a validação do formulário.
+- Paginação, filtros e autenticação na listagem de candidatos.
+
