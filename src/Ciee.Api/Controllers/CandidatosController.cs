@@ -10,11 +10,19 @@ public class CandidatosController : ControllerBase
 {
     private readonly ICandidatoAppService _candidatoAppService;
     private readonly IPdfService _pdfService;
+    private readonly ILogger<CandidatosController> _logger;
+    private readonly IWebHostEnvironment _environment;
 
-    public CandidatosController(ICandidatoAppService candidatoAppService, IPdfService pdfService)
+    public CandidatosController(
+        ICandidatoAppService candidatoAppService,
+        IPdfService pdfService,
+        ILogger<CandidatosController> logger,
+        IWebHostEnvironment environment)
     {
         _candidatoAppService = candidatoAppService;
         _pdfService = pdfService;
+        _logger = logger;
+        _environment = environment;
     }
 
     // POST: api/candidatos (Cadastro Manual ou Final após revisão do PDF)
@@ -28,11 +36,29 @@ public class CandidatosController : ControllerBase
         }
         catch (ArgumentException ex)
         {
+            // Validações do domínio (ex.: e-mail com formato inválido)
             return BadRequest(new { erro = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            // Regra de negócio violada: e-mail já cadastrado
+            return Conflict(new { erro = ex.Message });
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { erro = "Ocorreu um erro interno ao cadastrar o candidato.", detalhes = ex.Message });
+            _logger.LogError(ex, "Erro inesperado ao cadastrar candidato.");
+
+            // Detalhes técnicos só aparecem em desenvolvimento
+            if (_environment.IsDevelopment())
+            {
+                return StatusCode(500, new
+                {
+                    erro = "Ocorreu um erro interno ao cadastrar o candidato.",
+                    detalhes = ex.Message
+                });
+            }
+
+            return StatusCode(500, new { erro = "Ocorreu um erro interno ao cadastrar o candidato." });
         }
     }
 
@@ -54,7 +80,6 @@ public class CandidatosController : ControllerBase
 
         return Ok(candidato);
     }
-
 
     // POST: api/candidatos/extrair-pdf (Extração de dados do currículo em PDF)
     [HttpPost("extrair-pdf")]
@@ -82,8 +107,10 @@ public class CandidatosController : ControllerBase
 
             return Ok(resultadoExtracao);
         }
-        catch (Exception)
+        catch (Exception ex)
         {
+            _logger.LogWarning(ex, "Falha ao extrair dados do PDF {Arquivo}.", arquivo.FileName);
+
             // Requisito: A falha na leitura não pode impedir o cadastro manual
             // Retornamos um objeto vazio ou parcial com status 200 para o front tratar sem quebrar a tela
             return Ok(new ExtrairPdfResponse

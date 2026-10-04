@@ -19,6 +19,12 @@ public class CandidatoAppService : ICandidatoAppService
     {
         var emailVO = new Email(request.Email);
 
+        var jaExiste = await _candidatoRepository.ExisteComEmailAsync(emailVO);
+        if (jaExiste)
+        {
+            throw new InvalidOperationException("Já existe um candidato cadastrado com este e-mail.");
+        }
+
         var candidato = new Candidato(
             request.NomeCompleto,
             emailVO,

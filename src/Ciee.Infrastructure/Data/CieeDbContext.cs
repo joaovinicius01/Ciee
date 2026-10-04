@@ -23,11 +23,17 @@ public class CieeDbContext : DbContext
 
             // Mapeia o Value Object Email para uma coluna string no banco
             entity.Property(c => c.Email)
-                .HasConversion(
-                    email => email.Endereco,
-                    endereco => new Ciee.Domain.ValueObjects.Email(endereco))
-                .IsRequired()
-                .HasMaxLength(150);
+     .HasConversion(
+         email => email.Endereco,
+         endereco => new Ciee.Domain.ValueObjects.Email(endereco))
+                 .HasColumnType("VARCHAR(150)") 
+                 .HasMaxLength(150)
+                 .IsRequired();
+
+            // Garante no banco que não existem dois candidatos com o mesmo e-mail
+            entity.HasIndex(c => c.Email)
+                .IsUnique()
+                .HasDatabaseName("IX_Candidatos_Email");
 
             entity.Property(c => c.Telefone)
                 .HasMaxLength(20);
