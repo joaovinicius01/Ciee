@@ -5,6 +5,7 @@ using Ciee.Infrastructure.Data;
 using Ciee.Infrastructure.Repositories;
 using Ciee.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.RateLimiting;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,6 +33,28 @@ builder.Services.AddCors(options =>
     });
 });
 
+// 4. Configuração de Rate Limiting (Proteção contra requisições excessivas)
+builder.Services.AddRateLimiter(options =>
+{
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                AutoReplenishment = true,
+                PermitLimit = 30,
+                QueueLimit = 2,
+                Window = TimeSpan.FromSeconds(10)
+            }));
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = StatusCodes.Status429TooManyRequests;
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsync(
+            "{\"erro\": \"Muitas requisições. Tente novamente mais tarde.\"}", cancellationToken);
+    };
+});
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -44,6 +67,8 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseCors("AllowAll");
+
+app.UseRateLimiter();
 
 app.UseAuthorization();
 
