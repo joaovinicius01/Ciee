@@ -125,3 +125,4 @@ Cerca de 16 horas, distribuídas em 3 dias de desenvolvimento, testes e document
 - Testes de integração dos endpoints e do banco com `WebApplicationFactory`.
 - Testes do front-end (por exemplo, Vitest e Testing Library) para a validação do formulário.
 - Paginação, filtros e autenticação na listagem de candidatos.
+

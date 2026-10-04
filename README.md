@@ -222,3 +222,5 @@ O `PdfPigService` lê o texto de cada página com `ContentOrderTextExtractor`, q
 ## Documentação do desenvolvimento
 
 Decisões técnicas, uso de IA, dificuldades e melhorias futuras estão detalhados no arquivo [`DESENVOLVIMENTO.md`](DESENVOLVIMENTO.md).
+
+
