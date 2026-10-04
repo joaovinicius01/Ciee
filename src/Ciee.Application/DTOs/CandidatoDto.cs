@@ -1,0 +1,12 @@
+﻿namespace Ciee.Application.DTOs;
+
+public class CandidatoDto
+{
+    public Guid Id { get; set; }
+    public string NomeCompleto { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Telefone { get; set; } = string.Empty;
+    public string AreaInteresse { get; set; } = string.Empty;
+    public string ResumoProfissional { get; set; } = string.Empty;
+    public DateTime DataCriacao { get; set; }
+}
