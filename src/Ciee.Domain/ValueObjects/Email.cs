@@ -6,12 +6,12 @@ public class Email
 
     public Email(string endereco)
     {
-        if (string.IsNullOrWhiteSpace(endereco) || !endereco.Contains("@") || !endereco.Contains("."))
-        {
-            throw new ArgumentException("E-mail inválido.");
-        }
+        if (string.IsNullOrWhiteSpace(endereco))
+            throw new ArgumentException("O e-mail não pode ser vazio.");
+
+        if (endereco.Length > 150)
+            throw new ArgumentException("O e-mail deve ter no máximo 150 caracteres.");
+
         Endereco = endereco;
     }
-
-    public override string ToString() => Endereco;
 }

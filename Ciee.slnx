@@ -7,6 +7,5 @@
     <Project Path="src/Ciee.Infrastructure/Ciee.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/backend/database/" />
-  <Folder Name="/src/frontend/" />
   <Project Path="Ciee.UnitTests/Ciee.UnitTests.csproj" Id="575f73dc-1cb0-443a-ae20-10d52b051dd0" />
 </Solution>
