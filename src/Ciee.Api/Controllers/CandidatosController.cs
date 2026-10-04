@@ -55,6 +55,7 @@ public class CandidatosController : ControllerBase
         return Ok(candidato);
     }
 
+
     // POST: api/candidatos/extrair-pdf (Extração de dados do currículo em PDF)
     [HttpPost("extrair-pdf")]
     public async Task<IActionResult> ExtrairPdf(IFormFile arquivo)
