@@ -1,0 +1,51 @@
+:root {
+  --bg: #14161b;
+  --surface: #1b1e25;
+  --surface-2: #232731;
+  --borda: #2f3441;
+  --texto: #e8eaef;
+  --texto-suave: #9aa3b2;
+
+  --acento: #4c8dff;
+  --acento-hover: #3a7af0;
+
+  --erro: #ff8a8a;
+  --erro-borda: #ff5c5c;
+  --erro-fundo: rgba(255, 92, 92, 0.12);
+
+  --sucesso: #6fdc97;
+  --sucesso-borda: #3fbf6f;
+  --sucesso-fundo: rgba(95, 209, 138, 0.12);
+
+  --info: #8ebaff;
+  --info-borda: #4c8dff;
+  --info-fundo: rgba(76, 141, 255, 0.12);
+
+  color-scheme: dark;
+  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  line-height: 1.5;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--texto);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}

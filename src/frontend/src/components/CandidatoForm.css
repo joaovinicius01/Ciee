@@ -1,0 +1,227 @@
+.cartao {
+  background: var(--surface);
+  border: 1px solid var(--borda);
+  border-radius: 10px;
+  padding: 24px;
+}
+
+.cartao h2 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
+/* ---------- Mensagens (banner) ---------- */
+
+.aviso {
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  border: 1px solid;
+  border-left-width: 4px;
+  font-size: 0.95rem;
+}
+
+.aviso-erro {
+  background: var(--erro-fundo);
+  border-color: var(--erro-borda);
+  color: var(--erro);
+}
+
+.aviso-sucesso {
+  background: var(--sucesso-fundo);
+  border-color: var(--sucesso-borda);
+  color: var(--sucesso);
+}
+
+.aviso-info {
+  background: var(--info-fundo);
+  border-color: var(--info-borda);
+  color: var(--info);
+}
+
+/* ---------- Upload do PDF ---------- */
+
+.upload {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 24px;
+  padding: 14px 16px;
+  border: 1px dashed var(--borda);
+  border-radius: 8px;
+  background: var(--surface-2);
+  cursor: pointer;
+  transition: border-color 0.15s;
+}
+
+.upload:hover,
+.upload:focus-within {
+  border-color: var(--acento);
+}
+
+.upload.desativado {
+  opacity: 0.65;
+  cursor: progress;
+}
+
+.upload input[type='file'] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: inherit;
+}
+
+.upload-botao {
+  flex-shrink: 0;
+  padding: 7px 14px;
+  border-radius: 6px;
+  background: var(--acento);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.upload-texto {
+  min-width: 0;
+}
+
+.upload-titulo {
+  margin: 0;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.upload-detalhe {
+  margin: 2px 0 0;
+  color: var(--texto-suave);
+  font-size: 0.85rem;
+  overflow-wrap: anywhere;
+}
+
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 6px;
+  border: 2px solid var(--texto-suave);
+  border-top-color: transparent;
+  border-radius: 50%;
+  vertical-align: -1px;
+  animation: girar 0.8s linear infinite;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spinner {
+    animation-duration: 2.4s;
+  }
+}
+
+/* ---------- Campos ---------- */
+
+.campo {
+  margin-bottom: 18px;
+}
+
+.campo label {
+  display: block;
+  margin-bottom: 6px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-align: left;
+}
+
+.obrigatorio {
+  color: var(--texto-suave);
+}
+
+.campo input,
+.campo textarea {
+  display: block;
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--borda);
+  border-radius: 6px;
+  background: var(--surface-2);
+  color: var(--texto);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.campo textarea {
+  resize: vertical;
+  min-height: 110px;
+}
+
+.campo input::placeholder,
+.campo textarea::placeholder {
+  color: #6b7384;
+}
+
+.campo input:focus,
+.campo textarea:focus {
+  outline: none;
+  border-color: var(--acento);
+  box-shadow: 0 0 0 3px rgba(76, 141, 255, 0.25);
+}
+
+.campo input.invalido,
+.campo textarea.invalido {
+  border-color: var(--erro-borda);
+}
+
+.campo input.invalido:focus,
+.campo textarea.invalido:focus {
+  box-shadow: 0 0 0 3px rgba(255, 92, 92, 0.25);
+}
+
+.campo-erro {
+  margin: 6px 0 0;
+  color: var(--erro);
+  font-size: 0.85rem;
+}
+
+/* ---------- Botão ---------- */
+
+.botao-principal {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 6px;
+  background: var(--acento);
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.botao-principal:hover:not(:disabled) {
+  background: var(--acento-hover);
+}
+
+.botao-principal:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+@media (max-width: 480px) {
+  .cartao {
+    padding: 16px;
+  }
+
+  .upload {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .botao-principal {
+    width: 100%;
+  }
+}
