@@ -1,9 +1,12 @@
 <Solution>
-  <Folder Name="/src/">
+  <Folder Name="/src/" />
+  <Folder Name="/src/backend/">
     <Project Path="src/Ciee.Api/Ciee.Api.csproj" />
     <Project Path="src/Ciee.Application/Ciee.Application.csproj" />
     <Project Path="src/Ciee.Domain/Ciee.Domain.csproj" />
     <Project Path="src/Ciee.Infrastructure/Ciee.Infrastructure.csproj" />
   </Folder>
-  <Folder Name="/src/database/" />
+  <Folder Name="/src/backend/database/" />
+  <Folder Name="/src/frontend/" />
+  <Project Path="Ciee.UnitTests/Ciee.UnitTests.csproj" Id="575f73dc-1cb0-443a-ae20-10d52b051dd0" />
 </Solution>
