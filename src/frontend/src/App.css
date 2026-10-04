@@ -1,0 +1,29 @@
+.topo {
+  border-bottom: 1px solid var(--borda);
+  background: var(--surface);
+}
+
+.topo-conteudo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 20px 16px;
+}
+
+.topo h1 {
+  margin: 0;
+  font-size: 1.35rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.topo p {
+  margin: 2px 0 0;
+  color: var(--texto-suave);
+  font-size: 0.95rem;
+}
+
+.conteudo {
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 24px 16px 48px;
+}
