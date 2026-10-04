@@ -1,0 +1,6 @@
+@Ciee.Api_HostAddress = http://localhost:5241
+
+GET {{Ciee.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

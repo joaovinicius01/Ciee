@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Ciee.Api/Ciee.Api.csproj" />
+    <Project Path="src/Ciee.Application/Ciee.Application.csproj" />
+    <Project Path="src/Ciee.Domain/Ciee.Domain.csproj" />
+    <Project Path="src/Ciee.Infrastructure/Ciee.Infrastructure.csproj" />
+  </Folder>
+</Solution>
